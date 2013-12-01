@@ -1,0 +1,24 @@
+﻿#基础
+@map:graph
+	color = 125,12,55
+	stroke = 10f
+	shape = circle
+@list:combox
+	形状
+	线型
+	颜色
+#实践
+@table:luck
+  {
+	draw = true%20or%20false
+	fill = false
+  }
+  {
+	composite=srcOver
+	alpha=.5%
+	transform=rotate
+	fill=50^
+  }
+  {
+	period=10/22
+  }

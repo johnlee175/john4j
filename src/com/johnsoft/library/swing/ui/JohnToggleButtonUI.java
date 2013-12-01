@@ -1,4 +1,4 @@
-package com.johnsoft.library.swing.component;
+package com.johnsoft.library.swing.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

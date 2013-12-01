@@ -1,5 +1,6 @@
 package com.johnsoft.library.util.common;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -79,4 +80,35 @@ public class JohnFileUtil
 		return isSuc;
     }
 	
+	public static String readFile(String filePath,String charset)
+	{ 
+		File file=new File(filePath);
+		if(!file.exists()||file.isDirectory())
+		{
+			return null;
+		}
+		StringBuffer sb=new StringBuffer();
+		try
+		{
+			FileInputStream fis=new FileInputStream(file);
+			BufferedInputStream bis=new BufferedInputStream(fis);
+			byte[] bytes=new byte[bis.available()];
+			int len;
+			while((len=bis.read(bytes))>0)
+			{
+				if(JohnStringUtil.isNotEmpty(charset))
+				{
+					sb.append(new String(bytes,0,len,charset));
+				}else{
+					sb.append(new String(bytes,0,len));
+				}
+			}
+			bis.close();
+			fis.close();
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return sb.toString();
+	}
 } 

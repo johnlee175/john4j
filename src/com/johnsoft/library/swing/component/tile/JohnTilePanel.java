@@ -1,16 +1,12 @@
 package com.johnsoft.library.swing.component.tile;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 
 import com.johnsoft.library.swing.layout.JohnGridLayout;
 
@@ -27,21 +23,8 @@ public class JohnTilePanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	
-	/**
-	 * 代表Tile Layout中每一单元格
-	 * @author john
-	 */
-	public interface Tile
-	{
-		/**
-		 * 如何呈现单元格
-		 * @param index 该单元格在表格数组中的位置
-		 */
-		public JPanel createTile(int index);
-	}
-	
 	private JPanel mainTilePane;//所有单元格的容器
-	private List<Tile> modelList;//单元格组件面板数组
+	private List<JohnTile> modelList;//单元格组件面板数组
 	
 	public JohnTilePanel()
 	{
@@ -81,13 +64,13 @@ public class JohnTilePanel extends JPanel
   	return  (JohnGridLayout)mainTilePane.getLayout();
   }
   
-  public void setTilePanelModel(List<Tile> modelList)
+  public void setTilePanelModel(List<JohnTile> modelList)
 	{
 		this.modelList=modelList;
 		buildTilePanel();
 	}
 	
-	public List<Tile> getTilePanelModel()
+	public List<JohnTile> getTilePanelModel()
 	{
 		return modelList;
 	}
@@ -174,31 +157,31 @@ public class JohnTilePanel extends JPanel
   	}
   }
   
-	public static void main(String[] args)
-	{
-		Color[] colors=new Color[]{Color.BLACK,Color.BLUE,Color.CYAN,Color.GREEN,Color.MAGENTA,Color.ORANGE,Color.PINK,Color.RED,Color.YELLOW};
-		List<Tile> list=new ArrayList<Tile>();
-		for(int i=0;i<9;i++)
-		{
-			list.add(new JohnBasicTileModel(colors[i]));
-		}
-		JFrame jf=new JFrame();
-		JohnTilePanel tp=new JohnTilePanel();
-		tp.setBackground(Color.WHITE);
-		tp.setTilePanelModel(list);
-		tp.setTilePanelLayoutAutoBounds(2, new Dimension(70,100), 10, true);
-	//	tp.setTilePanelBounds(new Rectangle(5, 5, 360, 360));
-	//	tp.setTilePanelLayout(new GridLayout2(7, 4, 10, 10, new Insets(10, 10, 10, 10)));
-	//	tp.setTilePanelLayoutToFit(4,new Dimension(70,100));
-	//	tp.setTilePanelLayoutToFit(7);
-		tp.setPreferredSize(tp.getTilePanelBounds().getSize());
-		JPanel jpx=new JPanel();
-		JScrollPane jsp=new JScrollPane(tp);
-		jsp.setPreferredSize(new Dimension(200, 200));
-		jpx.add(jsp);
-		jf.add(jpx);
-		jf.setMinimumSize(new Dimension(360,360));
-		jf.setBounds(100, 100, 450, 450);
-		jf.setVisible(true);
-	}
+//	public static void main(String[] args)
+//	{
+//		Color[] colors=new Color[]{Color.BLACK,Color.BLUE,Color.CYAN,Color.GREEN,Color.MAGENTA,Color.ORANGE,Color.PINK,Color.RED,Color.YELLOW};
+//		List<Tile> list=new ArrayList<Tile>();
+//		for(int i=0;i<9;i++)
+//		{
+//			list.add(new JohnBasicTileModel(colors[i]));
+//		}
+//		JFrame jf=new JFrame();
+//		JohnTilePanel tp=new JohnTilePanel();
+//		tp.setBackground(Color.WHITE);
+//		tp.setTilePanelModel(list);
+//		tp.setTilePanelLayoutAutoBounds(2, new Dimension(70,100), 10, true);
+//		tp.setTilePanelBounds(new Rectangle(5, 5, 360, 360));
+//		tp.setTilePanelLayout(new GridLayout2(7, 4, 10, 10, new Insets(10, 10, 10, 10)));
+//		tp.setTilePanelLayoutToFit(4,new Dimension(70,100));
+//		tp.setTilePanelLayoutToFit(7);
+//		tp.setPreferredSize(tp.getTilePanelBounds().getSize());
+//		JPanel jpx=new JPanel();
+//		JScrollPane jsp=new JScrollPane(tp);
+//		jsp.setPreferredSize(new Dimension(200, 200));
+//		jpx.add(jsp);
+//		jf.add(jpx);
+//		jf.setMinimumSize(new Dimension(360,360));
+//		jf.setBounds(100, 100, 450, 450);
+//		jf.setVisible(true);
+//	}
 }

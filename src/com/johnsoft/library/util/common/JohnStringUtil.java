@@ -1,7 +1,5 @@
 package com.johnsoft.library.util.common;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -239,32 +237,6 @@ public class JohnStringUtil
 		{
 			return false;
 		}
-	}
-	//判断字符是否是枚举的格式的日期，采用迭代法
-	private static boolean parseDate(String text,String[] datePattern,int index)
-	{
-		  if(index==datePattern.length)
-		  {
-		  	return false;
-		  }
-			SimpleDateFormat format=new SimpleDateFormat(datePattern[index]);
-			format.setLenient(false);
-			try
-			{
-				format.parse(text);
-				return true;
-			} catch (ParseException e)
-			{
-				return	parseDate(text,datePattern,index+1);
-			}
-	}
-	/**
-	 * 是否是符合格式的日期
-	 * @param datePattern 日期格式的枚举
-	 */
-	public static boolean isFormattedDate(String text,String... datePattern)
-	{
-		return parseDate(text,datePattern,0);
 	}
 
 }

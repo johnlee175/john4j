@@ -2,11 +2,11 @@ package com.johnsoft.library.util.common;
 
 import java.util.prefs.Preferences;
 /**
- * java实现的不好，请用jRegistry 来操作注册表
+ * jdk实现的不好，请用jRegistry或JohnRegistryUtil来操作注册表
  * @author Administrator
  *
  */
-public class JohnRegTableHelper
+public class JohnRegistryHelper
 {
 	/**
 	 * 读HKEY_LOCAL_MACHINE\SOFTWARE\Javasoft\Prefs\目录下的所有注册变量 path;没有则创建
