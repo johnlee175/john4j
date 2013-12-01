@@ -4,9 +4,7 @@ import java.awt.Color;
 
 import javax.swing.JPanel;
 
-import com.johnsoft.library.swing.component.tile.JohnTilePanel.Tile;
-
-public class JohnBasicTileModel implements Tile
+public class JohnBasicTileModel implements JohnTile
 {
 	Color bg;
 	

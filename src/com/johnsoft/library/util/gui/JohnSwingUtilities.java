@@ -7,6 +7,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
@@ -48,7 +49,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -73,17 +73,16 @@ import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.MouseInputAdapter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
@@ -1587,6 +1586,93 @@ public class JohnSwingUtilities
 		return jmb;
 	}
 	
+	public static void pushMenu(JMenuBar jmenubar,String[][] menus)
+	{
+	    Color MENU_YELLOW=new Color(236, 233, 216);
+	    Color MENU_BLUE=new Color(49, 106, 197);
+	  	jmenubar.setBackground(MENU_YELLOW);
+	  	for(int i=0;i<menus.length;i++)
+	  	{
+	  		final JMenu jmenu=new JMenu(menus[i][0]);
+	  		addHoverEffect4MenuAbout(jmenu, MENU_BLUE, Color.WHITE, MENU_YELLOW, Color.BLACK);
+	  		jmenu.setBackground(MENU_YELLOW);
+	  		jmenubar.add(jmenu);
+	  		for(int j=1;j<menus[i].length;j++)
+	  		{
+	  			final JMenuItem jmenuitem=new JMenuItem(menus[i][j]);
+	  			addHoverEffect4MenuAbout(jmenuitem, MENU_BLUE, Color.WHITE, Color.WHITE, Color.BLACK);
+	  			jmenu.add(jmenuitem);
+	  		}
+	  	}
+	  }
+
+	  private static void addHoverEffect4MenuAbout(final Component component,final Color overbgcolor,final Color overfgcolor,final Color outbgcolor,final Color outfgcolor)
+	  {
+	  	component.addMouseListener(new MouseInputAdapter()
+			{
+				@Override
+				
+				public void mouseEntered(MouseEvent e)
+				{
+					component.setBackground(overbgcolor);
+					component.setForeground(overfgcolor);
+				}
+				@Override
+				public void mouseExited(MouseEvent e)
+				{
+					component.setBackground(outbgcolor);
+					component.setForeground(outfgcolor);
+				}
+				@Override
+				public void mousePressed(MouseEvent e)
+				{
+					component.setBackground(overbgcolor);
+					component.setForeground(overfgcolor);
+				}
+				@Override
+				public void mouseReleased(MouseEvent e)
+				{
+					component.setBackground(outbgcolor);
+					component.setForeground(outfgcolor);
+				}
+			});
+	  }
+	
+	public static JMenuItem getJMenuItem(String name,JMenuBar jmenubar)
+	{
+		JMenuItem returnedItem=null;
+		JMenuBar jbar =jmenubar;
+		for(int i=0;i<jbar.getMenuCount();i++)
+		{
+			JMenu jmenu=jbar.getMenu(i);
+			for(int j=0;j<jmenu.getItemCount();j++)
+			{
+				JMenuItem jitem=jmenu.getItem(j);
+				if(name.equals(jitem.getText()))
+				{
+					returnedItem=jitem;
+				}
+			}
+		}
+		return returnedItem;
+	}
+	
+	public static void jframeBGImg(String imgPath,JFrame frame)
+	{
+		ImageIcon background = new ImageIcon(imgPath);// 背景图片
+		JLabel label = new JLabel(background);// 把背景图片显示在一个标签里面
+		// 把标签的大小位置设置为图片刚好填充整个面板
+		label.setSize(frame.getSize().width, frame.getSize().height);
+		// 把内容窗格转化为JPanel，否则不能用方法setOpaque()来使内容窗格透明
+		JPanel imagePanel = (JPanel) frame.getContentPane();
+		imagePanel.setOpaque(false);
+		// 内容窗格默认的布局管理器为BorderLayout
+		imagePanel.setLayout(new FlowLayout());
+		frame.getLayeredPane().setLayout(null);
+		// 把背景图片添加到分层窗格的最底层作为背景
+		frame.getLayeredPane().add(label, new Integer(Integer.MIN_VALUE));
+	}
+	
 	/**
 	 * 此方法仅把常用的步骤组合起来封装JFrame
 	 * @param title 窗口的标题
@@ -1643,4 +1729,18 @@ public class JohnSwingUtilities
 		}, delay);
 	}
 	
+	/**
+	 * 获取系统默认的感观
+	 */
+	public static void getSysDefLookandFeel()
+	{
+		String lookandfeel=UIManager.getSystemLookAndFeelClassName();
+		try
+		{
+			UIManager.setLookAndFeel(lookandfeel);
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 }

@@ -4,6 +4,7 @@ package com.johnsoft.library.util.common;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -14,7 +15,9 @@ import java.util.Map;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
 
 /**
  * xml文件的辅助操作类
@@ -22,25 +25,10 @@ import org.dom4j.io.SAXReader;
  */
 public class JohnXmlHelper
 {
+	private XMLWriter writer;
 	private SAXReader reader;
 	private Document doc;
 	private Element root;
-	
-	private JohnXmlHelper(){
-	}
-	
-	private static class JohnXmlHolder
-	{
-		public static final JohnXmlHelper instance=new JohnXmlHelper();
-	}
-	
-	/**
-	 * @return JohnXmlHelper单例
-	 */
-	public static JohnXmlHelper getInstance()
-	{
-		return JohnXmlHolder.instance;
-	}
 	
 	/**
 	 * 读取xml文件流,如果不返还null,即读取成功,返回值为根元素
@@ -81,15 +69,53 @@ public class JohnXmlHelper
 		}
 	}
 	
+	/**
+	 * 创建打开格式化写入流
+	 * @param os 被包装的待写入的目标文档流
+	 * @param encode 编码方式
+	 */
+	public void beginWrite(OutputStream os,String encode)
+	{
+		try
+		{
+			OutputFormat format=OutputFormat.createPrettyPrint();
+			format.setEncoding(encode);
+			writer=new XMLWriter(os,format);
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 写入后关闭流
+	 */
+	public void endWrite()
+	{
+		try
+		{
+			writer.write(doc);
+			writer.close();
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	public SAXReader getReader()
 	{
 		return reader;
+	}
+	
+	public XMLWriter getWriter()
+	{
+		return writer;
 	}
 
 	/**
 	 * @return 文档对象
 	 */
-	public Document getDoc()
+	public Document getDocument()
 	{
 		return doc;
 	}
@@ -97,9 +123,18 @@ public class JohnXmlHelper
 	/**
 	 * @return 根节点
 	 */
-	public Element getRoot()
+	public Element getRootElement()
 	{
 		return root;
+	}
+	
+	/**
+	 * 仅仅获取根节点下的所有元素集合
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Element> getElementsUnderRoot()
+	{
+		 return (List<Element>)root.elements();
 	}
 
 	/**

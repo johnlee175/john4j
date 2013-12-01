@@ -23,12 +23,12 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -143,8 +143,8 @@ public class JohnTitlePane extends JPanel implements MouseListener,MouseMotionLi
 		powerSize=28;
 		gap=4;
 		
-		backgroundImage=new ImageIcon(getClass().getResource("/resource/images/NOCUT_9afhkn.jpg")).getImage();
-		backgroundAlpha=AlphaComposite.SrcOver.derive(0.5f);
+//		backgroundImage=new ImageIcon(getClass().getResource("/resource/images/NOCUT_9afhkn.jpg")).getImage();
+//		backgroundAlpha=AlphaComposite.SrcOver.derive(0.5f);
 		
 		titleString="johnSoft";
 		titleStringFont=new Font("微软雅黑", Font.PLAIN, 16);
@@ -181,10 +181,10 @@ public class JohnTitlePane extends JPanel implements MouseListener,MouseMotionLi
 		if(contentPane!=null)
 		{
 			contentPane.setBounds(computeContentPaneBounds());
+			revalidate();
 			if(uninit)
 			{
 				uninit=false;
-				revalidate();
 			}
 		}
 		
@@ -193,12 +193,13 @@ public class JohnTitlePane extends JPanel implements MouseListener,MouseMotionLi
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		Rectangle rect=g2.getClipBounds();
+		RoundRectangle2D.Double roundRect=new RoundRectangle2D.Double(rect.x, rect.y, rect.width, rect.height, windowArc, windowArc);
 		
 		if(!isOpaque())
 		{
 			g2.setColor(getBackground());
 			roundbounds=true;
-			g2.fillRoundRect(rect.x, rect.y, rect.width, rect.height, windowArc, windowArc);
+			g2.fill(roundRect);
 		}
 		
 		if(backgroundImage!=null)
@@ -208,12 +209,15 @@ public class JohnTitlePane extends JPanel implements MouseListener,MouseMotionLi
 			{
 				gtemp.setComposite(backgroundAlpha);
 			}
+			gtemp.clip(roundRect);
 			gtemp.drawImage(backgroundImage, rect.x, rect.y, rect.width, rect.height, null);
 		}
 		
 		if(icon!=null)
 		{
-			g2.drawImage(icon, gap, gap, powerSize, powerSize, null);
+			int w=Math.min(powerSize,icon.getWidth(null));
+			int h=Math.min(powerSize, icon.getHeight(null));
+			g2.drawImage(icon, (powerSize+2*gap-w)/2, (powerSize+2*gap-h)/2, w, h, null);
 			controllerBoundsMap.put("icon", new Rectangle(gap, gap, powerSize, powerSize));
 		}
 		

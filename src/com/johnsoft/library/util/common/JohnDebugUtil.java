@@ -43,7 +43,7 @@ public class JohnDebugUtil
 			boolean timefit=start<end?(start<curr&&curr<end):(curr>start||curr<end);
 			if (timefit)
 			{
-				if (struct.count==0)
+				if (struct.count==1)
 				{
 					StackTraceElement ste=Thread.currentThread().getStackTrace()[2];
 					try
@@ -73,7 +73,7 @@ public class JohnDebugUtil
 			boolean timefit=start<end?(start<curr&&curr<end):(curr>start||curr<end);
 			if (timefit)
 			{
-				if (struct.count==0)
+				if (struct.count==1)
 				{
 					StackTraceElement ste=Thread.currentThread().getStackTrace()[2];
 					try
@@ -159,7 +159,7 @@ public class JohnDebugUtil
 			{
 				this.start_millisecond=sdf.parse(starttime).getTime();
 				this.end_millisecond=sdf.parse(endtime).getTime();
-				this.count=this.full=count;
+				this.count=this.full=count<1?1:count;
 			} catch (ParseException e)
 			{
 				e.printStackTrace();
