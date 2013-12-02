@@ -175,12 +175,6 @@ public class JohnDebugUtil
 		}
 	}
 	
-	/** 增加struct的计数,比如在for循环中的开始和结束处打算打印,但如果共用一个struct将导致一次循环减少两次计数,除了在两处分别提供struct外,可以调用此方法*/
-	public static final void popCount(JohnDebugSelectStruct struct)
-	{
-		struct.count++;
-	}
-	
 	/** 用于write_select,print_select函数的数据类 */
 	public static class JohnDebugSelectStruct
 	{
