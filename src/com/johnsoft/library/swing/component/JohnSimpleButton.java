@@ -41,7 +41,7 @@ public abstract class JohnSimpleButton extends JLabel
 			{
 				if(isEnabled())
 				{
-					setBorder(BorderFactory.createLoweredSoftBevelBorder());
+					setBorder(BorderFactory.createLoweredBevelBorder());
 					if(pressColor!=null)
 					{
 						setBackground(pressColor);
@@ -54,7 +54,7 @@ public abstract class JohnSimpleButton extends JLabel
 			{
 				if(isEnabled())
 				{
-					setBorder(BorderFactory.createRaisedSoftBevelBorder());
+					setBorder(BorderFactory.createRaisedBevelBorder());
 				  if(rollOverColor!=null)
 				  {
 				  	setBackground(rollOverColor);

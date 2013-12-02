@@ -30,7 +30,7 @@ public class JohnPartableFileChooser extends JPanel
 	private JLabel filePathLab;
 	private JLabel fileTypeLab;
 	private JTextField filePathText;
-	private JComboBox<?> fileTypeCombox;
+	private JComboBox fileTypeCombox;
 	private JButton okButton;
 	private JButton cancelButton;
 	private JToggleButton latestBrowse;
@@ -39,7 +39,7 @@ public class JohnPartableFileChooser extends JPanel
 	private JToggleButton mycompute;
 	private JToggleButton internetBrowse;
 	private JLabel lookupLab;
-	private JComboBox<?> lookupCombox;
+	private JComboBox lookupCombox;
 	private JButton upPath;
 	private JButton newFolder;
 	private JButton lookupType;
@@ -73,7 +73,7 @@ public class JohnPartableFileChooser extends JPanel
 		filePathLab=(JLabel)twoLabel.getComponent(1);
 		fileTypeLab=(JLabel)twoLabel.getComponent(3);
 		filePathText=(JTextField)twoField.getComponent(1);
-		fileTypeCombox=(JComboBox<?>)twoField.getComponent(3);
+		fileTypeCombox=(JComboBox)twoField.getComponent(3);
 		okButton=(JButton)twoButton.getComponent(1);
 		cancelButton=(JButton)twoButton.getComponent(3);
 		latestBrowse=(JToggleButton)leftBar.getComponent(0);
@@ -82,7 +82,7 @@ public class JohnPartableFileChooser extends JPanel
 		mycompute=(JToggleButton)leftBar.getComponent(6);
 		internetBrowse=(JToggleButton)leftBar.getComponent(8);
 		lookupLab=(JLabel)topBar.getComponent(0);
-		lookupCombox=(JComboBox<?>)topBar.getComponent(2);
+		lookupCombox=(JComboBox)topBar.getComponent(2);
 		upPath=(JButton)topBar.getComponent(4);
 		newFolder=(JButton)topBar.getComponent(5);
 		lookupType=(JButton)topBar.getComponent(6);
@@ -208,12 +208,12 @@ public class JohnPartableFileChooser extends JPanel
 		this.filePathText = filePathText;
 	}
 
-	public JComboBox<?> getFileTypeCombox()
+	public JComboBox getFileTypeCombox()
 	{
 		return fileTypeCombox;
 	}
 
-	public void setFileTypeCombox(JComboBox<?> fileTypeCombox)
+	public void setFileTypeCombox(JComboBox fileTypeCombox)
 	{
 		this.fileTypeCombox = fileTypeCombox;
 	}
@@ -298,12 +298,12 @@ public class JohnPartableFileChooser extends JPanel
 		this.lookupLab = lookupLab;
 	}
 
-	public JComboBox<?> getLookupCombox()
+	public JComboBox getLookupCombox()
 	{
 		return lookupCombox;
 	}
 
-	public void setLookupCombox(JComboBox<?> lookupCombox)
+	public void setLookupCombox(JComboBox lookupCombox)
 	{
 		this.lookupCombox = lookupCombox;
 	}

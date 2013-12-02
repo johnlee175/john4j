@@ -623,11 +623,11 @@ public class JohnFileTreeNodePopupMenu extends JPopupMenu
 		JLabel title=new JLabel(bundle.getString("filter.option"));
 		
 		JLabel nameLabel=new JLabel(bundle.getString("filter.name"));
-		final JComboBox<String> nameOperate=new JComboBox<String>(new String[]{bundle.getString("filter.operate.equal"),bundle.getString("filter.operate.prefix"),bundle.getString("filter.operate.suffix"),bundle.getString("filter.operate.contain"),bundle.getString("filter.operate.expand")});
+		final JComboBox nameOperate=new JComboBox(new String[]{bundle.getString("filter.operate.equal"),bundle.getString("filter.operate.prefix"),bundle.getString("filter.operate.suffix"),bundle.getString("filter.operate.contain"),bundle.getString("filter.operate.expand")});
 		final JTextField nameField=new JTextField("");
 		
 		JLabel sizeLabel=new JLabel(bundle.getString("filter.size"));
-		final JComboBox<String> sizeOperate=new JComboBox<String>(new String[]{bundle.getString("filter.operate.equal"),bundle.getString("filter.operate.greater"),bundle.getString("filter.operate.less")});
+		final JComboBox sizeOperate=new JComboBox(new String[]{bundle.getString("filter.operate.equal"),bundle.getString("filter.operate.greater"),bundle.getString("filter.operate.less")});
 		final JTextField sizeField=new JTextField(bundle.getString("textfield.size"));
 		sizeField.addMouseListener(new MouseAdapter()
 		{
@@ -639,7 +639,7 @@ public class JohnFileTreeNodePopupMenu extends JPopupMenu
 		});
 		
 		JLabel dateLabel=new JLabel(bundle.getString("filter.date"));
-		final JComboBox<String> dateOperate=new JComboBox<String>(new String[]{bundle.getString("filter.operate.equal"),bundle.getString("filter.operate.greater"),bundle.getString("filter.operate.less")});
+		final JComboBox dateOperate=new JComboBox(new String[]{bundle.getString("filter.operate.equal"),bundle.getString("filter.operate.greater"),bundle.getString("filter.operate.less")});
 		final JTextField dateField=new JTextField(bundle.getString("textfield.datedemo"));
 		dateField.addMouseListener(new MouseAdapter()
 		{
@@ -959,9 +959,9 @@ public class JohnFileTreeNodePopupMenu extends JPopupMenu
 				JLabel replaceLab=new JLabel(bundle.getString("character.replace"));
 				final JTextField replace=new JTextField();
 				JLabel decodeLab=new JLabel(bundle.getString("character.decode"));
-				final JComboBox<String> decode=new JComboBox<String>(new String[]{"GBK","UTF-8","GB18030","ISO-8859-1","Unicode"});
+				final JComboBox decode=new JComboBox(new String[]{"GBK","UTF-8","GB18030","ISO-8859-1","Unicode"});
 				JLabel encodeLab=new JLabel(bundle.getString("character.encode"));
-				final JComboBox<String> encode=new JComboBox<String>(new String[]{"GBK","UTF-8","GB18030","ISO-8859-1","Unicode"});
+				final JComboBox encode=new JComboBox(new String[]{"GBK","UTF-8","GB18030","ISO-8859-1","Unicode"});
 				final JCheckBox caseSensitive=new JCheckBox(bundle.getString("character.case"));
 				JButton execute=new JButton(bundle.getString("button.ok"));
 				
