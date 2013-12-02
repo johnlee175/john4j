@@ -35,9 +35,7 @@ public class JohnDebugUtil
 				if (struct.count==1)
 				{
 					StackTraceElement ste=Thread.currentThread().getStackTrace()[2];
-					PrintStream ps=isStdErr?System.err:System.out;
-					ps.println("FROM "+FULL_DATE_FORMAT.format(new Date())+" "+ste.getClassName()+"."+ste.getMethodName()+"("+ste.getFileName()+":"+ste.getLineNumber()+") - Message: "+message);
-					ps.close();
+					(isStdErr?System.err:System.out).println("FROM "+FULL_DATE_FORMAT.format(new Date())+" "+ste.getClassName()+"."+ste.getMethodName()+"("+ste.getFileName()+":"+ste.getLineNumber()+") - Message: "+message);
 					struct.count=struct.full;
 				}else{
 					--struct.count;
