@@ -5,14 +5,19 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.RandomAccessFile;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.Date;
@@ -239,4 +244,53 @@ public class JohnCommonUtil
 		}
 		return hs.toUpperCase();
 	}
+	
+	public static Boolean hasInstance()
+	{
+		try
+		{
+			final File file = new File("singleton.lock");
+			// Check if the lock exist
+			if (file.exists())
+			{// if exist try to delete it
+				file.delete();
+			}
+			// Try to get the lock
+			@SuppressWarnings("resource")
+			final FileChannel channel = new RandomAccessFile(file, "rw").getChannel();
+			final FileLock lock = channel.tryLock();
+			if (lock == null)
+			{
+				// File is lock by other application
+				channel.close();
+				return true;
+			}
+			// Add shutdown hook to release lock when application shutdown
+			Runtime.getRuntime().addShutdownHook(new Thread()
+			{
+				@Override
+				public void run()
+				{
+					try
+					{
+						if (lock != null)
+						{
+							lock.release();
+							channel.close();
+							file.delete();
+						}
+					} catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			});
+			Thread.sleep(500);
+			return false;
+		} catch (Exception e)
+		{
+			return null;
+		}
+	}
+	
 }

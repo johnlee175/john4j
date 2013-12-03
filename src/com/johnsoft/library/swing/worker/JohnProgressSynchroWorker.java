@@ -1,6 +1,7 @@
 package com.johnsoft.library.swing.worker;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -13,14 +14,17 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
+import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
 import com.johnsoft.library.util.gui.JohnException;
@@ -31,14 +35,10 @@ import com.johnsoft.library.util.gui.JohnException;
  */
 public abstract class JohnProgressSynchroWorker implements JohnWorker
 {
-	/**异常发生时的建议*/
-	protected String exceptionSuggests;
-	/**异常信息界面和加载进度界面的父窗口*/
-	protected Window parentWindow;
-	/**当发生异常弹出异常信息界面后点击继续按钮时的动作*/
-	protected Action continueButtonAction;
 	/**使用此后台执行的长时间任务的主题*/
 	protected String taskName;
+	/**异常信息界面和加载进度界面的父窗口*/
+	protected Window parentWindow;
 	/**当前正在执行的步骤描述*/
 	protected String doingString;
 	/**加载进度界面的进度条*/
@@ -53,25 +53,25 @@ public abstract class JohnProgressSynchroWorker implements JohnWorker
 	protected JTextArea progressTip;
 	/**是否在执行后台任务时发生了异常,如果发生异常将不在调用safe_done方法作为收尾*/
 	protected boolean occurExceptionInBack;
+	/**空的监听器,用于在canCancel为false时使parentWindow的glassPane失去和恢复用户响应*/
+	private MouseAdapter emptyMouseListener;
+	/**任务线程*/
+	protected Thread taskThread;
 	/**进度值,应在0到100之间*/
 	protected int process=0;
 	/**是否任务取消*/
 	protected boolean canceled=false;
-	/**任务线程*/
-	protected Thread taskThread;
 	
 	/**
-	 * @param exceptionSuggests 异常发生时的建议
-	 * @param parentWindow 异常信息界面和加载进度界面的父窗口
-	 * @param continueButtonAction 当发生异常弹出异常信息界面后点击继续按钮时的动作
 	 * @param taskName 使用此后台执行的长时间任务的主题
+	 * @param parentWindow 异常信息界面和加载进度界面的父窗口
 	 */
-	public JohnProgressSynchroWorker(String exceptionSuggests,Window parentWindow,Action continueButtonAction,String taskName)
+	public JohnProgressSynchroWorker(String taskName, Window parentWindow)
 	{
-		this.exceptionSuggests=exceptionSuggests;
-		this.parentWindow=parentWindow;
-		this.continueButtonAction=continueButtonAction;
 		this.taskName=taskName;
+		this.parentWindow=parentWindow;
+		
+		emptyMouseListener=new MouseAdapter(){};
 		
 		taskThread=new Thread(taskName)
 		{
@@ -114,7 +114,7 @@ public abstract class JohnProgressSynchroWorker implements JohnWorker
 		cancel=new JButton("取消");
 		cancel.addActionListener(new ActionListener()
 		{
-			public void actionPerformed(ActionEvent paramActionEvent)
+			public void actionPerformed(ActionEvent e)
 			{
 				canceled=true;
 				taskThread.interrupt();
@@ -128,7 +128,6 @@ public abstract class JohnProgressSynchroWorker implements JohnWorker
 		prepareProgressPane();
 		
 		dialog.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		dialog.setResizable(false);
 		dialog.setLocationRelativeTo(parentWindow);
 		dialog.setVisible(true);
@@ -136,10 +135,62 @@ public abstract class JohnProgressSynchroWorker implements JohnWorker
 		taskThread.start();
 	}
 	
-	/**相当于原SwingWorker的done方法,但是是单线程同步执行,不过在发生异常时弹出信息窗口*/
-	protected abstract void safe_done();
-	/**相当于原SwingWorker的doInBackground方法,但是是单线程同步执行,不过在发生异常时弹出信息窗口*/
-	protected abstract void safe_doInBackground();
+	/**采用绝对布局布局加载进度界面,如果需要添加其他组件,请覆写此方法,并添加到dialog成员上,再在其类外添加事件监听*/
+	protected void prepareProgressPane()
+	{
+		bkImgTitle.setBounds(0, 0, 414, 42);
+		dialog.add(bkImgTitle);
+		
+		progressTip.setText(getInitTip());
+		progressTip.setBounds(25, 50, 365, 50);
+		dialog.add(progressTip);
+		
+		progressBar.setBounds(25, 110, 365, 18);
+		dialog.add(progressBar);
+		
+		JPanel optionPane = new JPanel(null);
+		optionPane.setBounds(0, 140, 414, 42);
+		dialog.add(optionPane);
+		
+		cancel.setBounds(320, 8, 70, 25);
+		if(!canCancel())
+			cancel.setEnabled(false);
+		optionPane.add(cancel);
+		
+		if(canCancel())
+		{
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		}else{
+			dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		}
+		
+		dialog.getContentPane().setBackground(Color.WHITE);
+		dialog.setTitle(getDialogTitle());
+		dialog.setLayout(null);
+		dialog.setSize(420, 210);
+		
+		if(!canCancel()&&parentWindow!=null)
+		{
+			Component glass=null;
+			if(parentWindow instanceof JFrame)
+			{
+				glass=((JFrame)parentWindow).getGlassPane();
+			}
+			else if(parentWindow instanceof JDialog)
+			{
+				glass=((JDialog)parentWindow).getGlassPane();
+			}
+			else if(parentWindow instanceof JWindow)
+			{
+				glass=((JWindow)parentWindow).getGlassPane();
+			}
+			if(glass!=null)
+			{
+				glass.addMouseListener(emptyMouseListener);
+				glass.setVisible(true);
+			}
+		}
+	}
 	
 	/**首先终止覆写,该方法无返回值,其中设置progress属性的0,100值,而且捕获了任何异常,并调用safe_doInBackground方法*/
 	protected final void doInBackground() 
@@ -151,7 +202,7 @@ public abstract class JohnProgressSynchroWorker implements JohnWorker
 			done();
 		} catch (Exception e)
 		{
-			JohnException.showException(e, exceptionSuggests, parentWindow, continueButtonAction);
+			JohnException.showException(e, getExceptionSuggests(), parentWindow, getContinueButtonAction());
 			occurExceptionInBack=true;
 		}
 	}
@@ -164,39 +215,48 @@ public abstract class JohnProgressSynchroWorker implements JohnWorker
 			Toolkit.getDefaultToolkit().beep();
 			dialog.setCursor(null);
 			dialog.dispose();
+			if(!canCancel()&&parentWindow!=null)
+			{
+				Component glass=null;
+				if(parentWindow instanceof JFrame)
+				{
+					glass=((JFrame)parentWindow).getGlassPane();
+				}
+				else if(parentWindow instanceof JDialog)
+				{
+					glass=((JDialog)parentWindow).getGlassPane();
+				}
+				else if(parentWindow instanceof JWindow)
+				{
+					glass=((JWindow)parentWindow).getGlassPane();
+				}
+				if(glass!=null)
+				{
+					glass.removeMouseListener(emptyMouseListener);
+					glass.setVisible(false);
+				}
+			}
 			if(!isOccurExceptionInBack()&&!canceled)
 			{
 				safe_done();
 			}
 		} catch (Exception e)
 		{
-			JohnException.showException(e, exceptionSuggests, parentWindow, continueButtonAction);
+			JohnException.showException(e, getExceptionSuggests(), parentWindow, getContinueButtonAction());
 			occurExceptionInBack=true;
 		}
 	}
 	
-	/**首先终止覆写,返回任务主题*/
-	public final String getTaskName()
-	{
-		return taskName;
-	}
+	/**相当于原SwingWorker的done方法,但是是单线程同步执行,不过在发生异常时弹出信息窗口*/
+	protected abstract void safe_done();
 	
-	/**首先终止覆写,查看是否执行过程发生过异常*/
-	public final boolean isOccurExceptionInBack()
-	{
-		return occurExceptionInBack;
-	}
+	/**相当于原SwingWorker的doInBackground方法,但是是单线程同步执行,不过在发生异常时弹出信息窗口*/
+	protected abstract void safe_doInBackground();
 	
-	/**首先终止覆写,返回是否用户取消了继续执行任务*/
-	public final boolean isCanceled()
-	{
-		return canceled;
-	}
-	
-	/**首先终止覆写,设置进度值和步骤描述,进度值应大于0并小于100,步骤描述应尽可能言简意赅;
+	/**
+	 * 首先终止覆写,设置进度值和步骤描述,进度值应大于0并小于100,步骤描述应尽可能言简意赅;
 	 * 应在safe_doInBackground方法中调用,如果safe_doInBackground没有逻辑,而是创建了一个对象,但此对象创建过程耗时,则可将本类传入对象构造,调用此方法
 	 */
-	@Override
 	public final void setProgressValue(int value,String doingStringDescrip)
 	{
 		this.process=value;
@@ -217,30 +277,52 @@ public abstract class JohnProgressSynchroWorker implements JohnWorker
 		});
 	}
 	
-	/**采用绝对布局布局加载进度界面,如果需要添加其他组件,请覆写此方法,并添加到dialog成员上,再在其类外添加事件监听*/
-	protected void prepareProgressPane()
+	/**首先终止覆写,返回任务主题*/
+	public final String getTaskName()
 	{
-		bkImgTitle.setBounds(0, 0, 414, 42);
-		dialog.add(bkImgTitle);
-		
-		progressTip.setText("正在计算...");
-		progressTip.setBounds(25, 50, 365, 50);
-		dialog.add(progressTip);
-		
-		progressBar.setBounds(25, 110, 365, 18);
-		dialog.add(progressBar);
-		
-		JPanel optionPane = new JPanel(null);
-		optionPane.setBounds(0, 140, 414, 42);
-		dialog.add(optionPane);
-		
-		cancel.setBounds(320, 8, 70, 25);
-		optionPane.add(cancel);
-		
-		dialog.getContentPane().setBackground(Color.WHITE);
-		dialog.setTitle("正在计算...");
-		dialog.setLayout(null);
-		dialog.setSize(420, 210);
+		return taskName;
+	}
+	
+	/**首先终止覆写,查看是否执行过程发生过异常*/
+	public final boolean isOccurExceptionInBack()
+	{
+		return occurExceptionInBack;
+	}
+	
+	/**首先终止覆写,返回是否用户取消了继续执行任务*/
+	public final boolean isCanceled()
+	{
+		return canceled;
+	}
+	
+	/**是否允许用户取消任务*/
+	protected boolean canCancel()
+	{
+		return true;
+	}
+	
+	/**异常发生时的建议*/
+	protected String getExceptionSuggests()
+	{
+		return "";
+	}
+	
+	/**当发生异常弹出异常信息界面后点击继续按钮时的动作*/
+	protected Action getContinueButtonAction()
+	{
+		return null;
+	}
+	
+	/**获取界面初始化时显示在状态提示里的文字*/
+	protected String getInitTip()
+	{
+		return "正在计算...";
+	}
+	
+	/**获取加载对话框的标题*/
+	protected String getDialogTitle()
+	{
+		return "";
 	}
 	
 }

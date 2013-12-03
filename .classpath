@@ -13,5 +13,10 @@
 	<classpathentry kind="lib" path="lib/swingx-1.6.jar"/>
 	<classpathentry kind="lib" path="lib/timingframework-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/tween-engine-api.jar"/>
+	<classpathentry kind="lib" path="lib/AnimatedTransitions.jar"/>
+	<classpathentry kind="lib" path="lib/gluegen-rt-natives-windows-i586.jar"/>
+	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="lib/jogl-all-natives-windows-i586.jar"/>
+	<classpathentry kind="lib" path="lib/jogl-all.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
