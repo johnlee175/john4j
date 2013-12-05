@@ -116,23 +116,33 @@ public class JohnAutoCompleteDefaultModel implements JohnAutoCompleteModel
 		 return null;
 	 }
 	 
-	 public Set<String> getInputKeySet()
+	 @Override
+	 public Set<String> getInputKeys()
 	 {
 		 return inputToShowMap.keySet();
 	 }
 	 
-	 public Set<String> getShowKeySet()
+	 @Override
+	 public Set<String> getShowKeys()
 	 {
 		 return showToCommitMap.keySet();
 	 }
 	 
+	 @Override
 	 public String getShowValue(Object inputValue)
 	 {
 		 return inputToShowMap.get(inputValue);
 	 }
 	 
-	 public String getCommitValue(Object showValue)
+	 @Override
+	 public String getCommitValue(Object showValue,String text)
 	 {
 		 return showToCommitMap.get(showValue);
+	 }
+
+	 @Override
+	 public String getKeyString(Object key)
+	 {
+		return key.toString();
 	 }
 }

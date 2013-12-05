@@ -1,6 +1,6 @@
 package com.johnsoft.library.swing.component.autocomplete;
 
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * 自动提示数据模型.一般采纳3个字段或列表实现.<br/>
@@ -11,17 +11,25 @@ import java.util.Set;
  * 需注意的是,当希望输入姓名或身份证号的时候都去匹配时,会从getShowKeySet()的返回的姓名列表再进行一次迭代,做指定匹配
  * @author 李哲浩
  */
+@SuppressWarnings("rawtypes")
 public interface JohnAutoCompleteModel
 {
 	 /**
-	  * @return 用户输入与此返回值迭代做比较判断是否匹配
+	  * @return 用户输入与此返回集合做迭代比较以判断是否匹配
 	  */
-	 public Set<String> getInputKeySet();
+	 public Collection getInputKeys();
 	 
 	 /**
-	  * @return 显示到自动提示列表的所有可能值
+	  * @return 显示到自动提示列表的所有可能值的集合
 	  */
-	 public Set<String> getShowKeySet();
+	public Collection getShowKeys();
+	 
+	 /**
+	  * 
+	  * @param key getInputKeys(),getShowKeys()返回的集合中的某一项
+	  * @return 参与和用户输入做匹配的项的字符串表示形式
+	  */
+	 public String getKeyString(Object key);
 	 
 	 /**
 	  * @param inputValue 用户输入的值
@@ -31,7 +39,8 @@ public interface JohnAutoCompleteModel
 	
 	 /**
 	  * @param showValue 自动提示列表中选择的值
+	  * @param text 当前要提交到的文本框的旧值
 	  * @return 选中后提交到文本框中的值
 	  */
-	 public String getCommitValue(Object showValue);
+	 public String getCommitValue(Object showValue,String text);
 }

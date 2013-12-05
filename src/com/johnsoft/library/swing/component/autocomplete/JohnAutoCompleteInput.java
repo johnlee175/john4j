@@ -15,8 +15,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -39,39 +42,16 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.text.Document;
 
 import com.johnsoft.library.util.gui.JohnSwingUtilities;
 
 
-
+@SuppressWarnings({"rawtypes","unchecked"})
 public class JohnAutoCompleteInput extends JTextField implements AWTEventListener,
 		ListCellRenderer, AncestorListener, KeyListener, DocumentListener,
 		MouseListener, MouseMotionListener, ListSelectionListener
 {
-	
-//	public static void main(String[] args) throws Exception
-//	{
-//		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//		JFrame jf = new JFrame();
-//		JPanel jp = new JPanel();
-//		JohnXmlHelper helper=JohnXmlHelper.getInstance();
-//		helper.read("D:\\airlines_code.xml");
-//		Element root=helper.getRoot();
-//		Map<String,String> map1=helper.getChildAttrsMaps(root,"NAME", "NAME" );
-//		Map<String,String> map2=helper.getChildAttrsMaps(root, "NAME" , "ICAO");
-//		 
-//		JTextField jtf = new JTextField();
-//		jtf.setColumns(30);
-//		JohnAutoCompleteDefaultModel model=new JohnAutoCompleteDefaultModel(map1,map2);
-//		JohnAutoCompleteInput input=new JohnAutoCompleteInput(model);
-//		input.setColumns(30);
-//		jp.add(input);
-//		jp.add(jtf);
-//		jf.add(jp);
-//		jf.setBounds(200, 200, 500, 400);
-//		jf.setVisible(true);
-//	}
-
 	private static final long serialVersionUID = 1L;
 
 	public enum JohnMatchType
@@ -102,10 +82,11 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 	protected int visibleRowCount;
 	protected int wrapLineIndex;
 	protected int rollOverIndex;
+	protected String multiMatchSplitSeparator;
 
 	protected JohnAutoCompleteModel model;
 	protected boolean inputTextAndShowTextAllMatched;
-	protected Set<String> showItemSet;
+	protected Set showItemSet;
 
 	protected Popup popup;
 	protected boolean autoCompleteShowing;
@@ -118,6 +99,8 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 	protected Color listRollOverForeground;
 	
 	protected int commitStyle;
+	
+	protected Object selectedValue;
 	
 	public static int getFullCommitStyle()
 	{
@@ -176,6 +159,31 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 		init();
 	}
 	
+	public JohnAutoCompleteInput(Document doc)
+	{
+		super();
+		setDocument(doc);
+		jtf = this;
+		init();
+	}
+	
+	public JohnAutoCompleteInput(Document doc,JohnAutoCompleteModel model)
+	{
+		super();
+		setDocument(doc);
+		jtf = this;
+		this.model=model;
+		init();
+	}
+	
+	public JohnAutoCompleteInput(Document doc, String text, int columns, JohnAutoCompleteModel model)
+	{
+		super(doc, text, columns);
+		jtf = this;
+		this.model=model;
+		init();
+	}
+	
 	public JohnAutoCompleteInput(JTextField jtf)
 	{
 		this(jtf,null);
@@ -188,7 +196,7 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 		this.model=model;
 		init();
 	}
-
+	
 	protected void init()
 	{
 		initUserDefaults();
@@ -210,12 +218,12 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 		listRollOverBorder = BorderFactory.createEmptyBorder();
 		setTraditionalCommitStyle();
 	}
-
+	
 	protected void initComponentDefaults()
 	{
 		updateListAllowed = true;
 		rollOverIndex = -1;
-		showItemSet = new HashSet<String>();
+		showItemSet = new HashSet();
 		jListModel = new DefaultListModel();
 		jList = new JList();
 		jsp = new JScrollPane(jList);
@@ -253,18 +261,25 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 		text = ignoreCase ? toSameCase(text) : text;
 		if (!text.trim().isEmpty())
 		{
-			filter(model.getInputKeySet(), text, true);
+			filter(model.getInputKeys(), text, true);
 			if (inputTextAndShowTextAllMatched)
 			{
-				filter(model.getShowKeySet(), text, false);
+				filter(model.getShowKeys(), text, false);
 			}
 		}
-		for (String item : showItemSet)
+		List tmp=new ArrayList(); 
+		for (Object obj : showItemSet)
 		{
+			String item=model.getKeyString(obj);
 			if(item!=null&&!item.trim().isEmpty())
 			{
-				jListModel.addElement(item);
+				tmp.add(item);
 			}
+		}
+		sort(tmp);
+		for(Object item : tmp)
+		{
+			jListModel.addElement(item);
 		}
 		jList.setModel(jListModel);
 		if (jListModel.size() > 0)
@@ -276,55 +291,76 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 			hideAutoComplete();
 		}
 	}
+	
+	protected void sort(List list)
+	{
+		Collections.sort(list);
+	}
+	
+	protected String[] split(String text)
+	{
+		return (multiMatchSplitSeparator==null||multiMatchSplitSeparator.isEmpty())?
+				new String[]{text}:text.split(multiMatchSplitSeparator);
+	}
+	
+	protected void customFilter(Set showItemSet, JohnAutoCompleteModel model, 
+			Object item, String utext, boolean translateItem)
+	{
+	}
 
-	protected void filter(Collection<String> collection, String text,
+	protected void filter(Collection collection, String text,
 			boolean translateItem)
 	{
-		for (String item : collection)
+		for (Object item : collection)
 		{
 			if(item==null) continue;
-			String itemUL = ignoreCase ? toSameCase(item) : item;
-			if (matchType == JohnMatchType.STARTSWITH)
+			String itemStr = model.getKeyString(item);
+			String itemUL = ignoreCase ? toSameCase(itemStr) : itemStr;
+			String[] utexts=split(text);
+			for(String utext:utexts)
 			{
-				if (itemUL.startsWith(text))
+				if (matchType == JohnMatchType.STARTSWITH)
 				{
-					showItemSet.add(wrapLine(translateItem ? model.getShowValue(item)
-							: item));
-				}
-			} else if (matchType == JohnMatchType.ENDWIDTH)
-			{
-				if (itemUL.endsWith(text))
+					if (itemUL.startsWith(utext))
+					{
+						showItemSet.add(wrapLine(translateItem ? model.getShowValue(item)
+								: itemStr));
+					}
+				} else if (matchType == JohnMatchType.ENDWIDTH)
 				{
-					showItemSet.add(wrapLine(translateItem ? model.getShowValue(item)
-							: item));
-				}
-			} else if (matchType == JohnMatchType.CONTAINS)
-			{
-				if (itemUL.contains(text))
+					if (itemUL.endsWith(utext))
+					{
+						showItemSet.add(wrapLine(translateItem ? model.getShowValue(item)
+								: itemStr));
+					}
+				} else if (matchType == JohnMatchType.CONTAINS)
 				{
-					showItemSet.add(wrapLine(translateItem ? model.getShowValue(item)
-							: item));
-				}
-			} else if (matchType == JohnMatchType.INDEXOF)
-			{
-				int lastIdx=-1;
-				boolean matched=true;
-				for(int i=0;i<text.length();i++)
+					if (itemUL.contains(utext))
+					{
+						showItemSet.add(wrapLine(translateItem ? model.getShowValue(item)
+								: itemStr));
+					}
+				} else if (matchType == JohnMatchType.INDEXOF)
 				{
-					 char ch=text.charAt(i);
-					 int idx=itemUL.indexOf(String.valueOf(ch),lastIdx);
-					 if(idx<=lastIdx)
-					 {
-						 matched=false;
-					 }else{
-						 lastIdx=idx;
-					 }
-				}
-				if(matched)
-				{
-					showItemSet.add(wrapLine(translateItem ? model.getShowValue(item)
-							: item));
-				}
+					int lastIdx=-1;
+					boolean matched=true;
+					for(int i=0;i<utext.length();i++)
+					{
+						 char ch=utext.charAt(i);
+						 int idx=itemUL.indexOf(String.valueOf(ch),lastIdx+1);
+						 if(idx<=lastIdx)
+						 {
+							 matched=false;
+						 }else{
+							 lastIdx=idx;
+						 }
+					}
+					if(matched)
+					{
+						showItemSet.add(wrapLine(translateItem ? model.getShowValue(item)
+								: itemStr));
+					}
+				} else customFilter(showItemSet, model, item, utext, translateItem);
 			}
 		}
 	}
@@ -397,7 +433,8 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 					p.y + jtf.getHeight());
 			popup.show();
 			autoCompleteShowing = true;
-			Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.MOUSE_EVENT_MASK+AWTEvent.WINDOW_EVENT_MASK);
+			Toolkit.getDefaultToolkit().addAWTEventListener(this,
+					AWTEvent.MOUSE_EVENT_MASK+AWTEvent.WINDOW_EVENT_MASK);
 		}
 	}
 	
@@ -440,13 +477,48 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 			break;
 		}
 	}
-
+	
 	protected void commit(Object obj)
 	{
+		selectedValue=obj;
 		if (obj != null)
 		{
-			jtf.setText(model.getCommitValue(obj));
+			jtf.setText(getCommitString(obj));
 		}
+	}
+	
+	protected String getCommitString(Object obj)
+	{
+		String oldText=jtf.getText();
+		String value=model.getCommitValue(obj, oldText);
+		if(multiMatchSplitSeparator==null||multiMatchSplitSeparator.isEmpty()||!replacePart(value))
+		{
+			return value;
+		}
+		String[] texts=oldText.split(multiMatchSplitSeparator);
+		for(int i=0;i<texts.length;i++)
+		{
+			if(value.contains(texts[i]))
+			{
+				texts[i]=formatCommitUnit(value);
+			}
+		}
+		StringBuffer sb=new StringBuffer();
+		for(int i=0;i<texts.length-1;i++)
+		{
+			sb.append(texts[i]).append(multiMatchSplitSeparator);
+		}
+		return sb.append(texts[texts.length-1]).toString();
+	}
+	
+	protected String formatCommitUnit(String value)
+	{
+		return value;
+	}
+	
+	protected boolean replacePart(String value)
+	{
+		return true;
 	}
 
 	protected void commitInProtection(Object obj)
@@ -554,7 +626,8 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 		{
 			MouseEvent evt=(MouseEvent)event;
 			if(JohnSwingUtilities.isLButtonDBClick(evt)||JohnSwingUtilities.isLButtonDown(evt)
-					&&obj!=jtf&&obj!=jsp&&obj!=jList&&!obj.getClass().getName().startsWith("javax.swing.Popup$"))
+					&&obj!=jtf&&obj!=jsp&&obj!=jList
+					&&!obj.getClass().getName().startsWith("javax.swing.Popup$"))
 			{
 				Component[] children=jsp.getComponents();
 				boolean isChild=false;
@@ -591,7 +664,7 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 	{
 		JLabel label = new JLabel();
 		label.setOpaque(true);
-		label.setText(value.toString());
+		label.setText(model.getKeyString(value));
 		label.setFont(UIManager.getFont("List.font"));
 		if (isSelected)
 		{
@@ -720,6 +793,11 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 	{
 		hideAutoComplete();
 	}
+	
+	public Object getSelectedValue()
+	{
+		return selectedValue;
+	}
 
 	public boolean isUpperCaseIfIgnore()
 	{
@@ -840,6 +918,16 @@ public class JohnAutoCompleteInput extends JTextField implements AWTEventListene
 	public void setCommitStyle(int commitStyle)
 	{
 		this.commitStyle = commitStyle;
+	}
+	
+	public void setMultiMatchSplitSeparator(String multiMatchSplitSeparator)
+	{
+		this.multiMatchSplitSeparator = multiMatchSplitSeparator;
+	}
+	
+	public String getMultiMatchSplitSeparator()
+	{
+		return multiMatchSplitSeparator;
 	}
 	
 }
