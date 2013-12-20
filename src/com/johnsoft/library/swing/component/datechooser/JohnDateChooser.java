@@ -344,6 +344,7 @@ public class JohnDateChooser extends JPanel
 	 */
 	public void followMoveAndShow(Window win)
 	{
+		if(win==null) return;
 		win.addComponentListener(new ComponentAdapter()
 		{
 			@Override

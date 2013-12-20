@@ -1,6 +1,8 @@
 package com.johnsoft.library.util.common;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +23,12 @@ public final class JohnPropManager
 	private Hashtable<String,List<Object>> invokeMap;//作用域别名下某属性与其在值变时通知对象的映射,List中依次循环放入对象和对象的方法
 	private byte[] propLock;//锁定aliasMap和propMap的存取操作
 	private byte[] invokeLock;//锁定invokeMap的存取操作
+	private int flags;
+	/** 标志位,指示当作为参数的作用域别名冲突时抛出异常*/
+	public static final int FLAG_THROW_ON_ALIAS_CONFLICT=1<<1;
+	/** 标志位,指示启用属性更改回调通知机制*/
+	public static final int FLAG_ENABLE_FIRE_PROP_CHANGE=1<<2;
+	
 	
 	private JohnPropManager()
 	{
@@ -50,6 +58,50 @@ public final class JohnPropManager
 	}
 	
 	/**
+	 * 创建propterties文件,并按照别名纳入管理
+	 * @param path properties文件路径
+	 * @param alias 作用域别名
+	 * @return 如果创建成功并纳入管理返回true,如果文件已经加载过,将返回false,如果文件创建出错,返回null
+	 */
+	public Boolean createProperties(String path,String alias)
+	{
+		String oldPath;
+		synchronized (propLock)
+		{
+			oldPath = aliasMap.get(alias);
+		}
+		if(oldPath!=null)
+		{
+			if(oldPath.equals(path))
+			{
+				return false;
+			}else{
+				if((flags & FLAG_THROW_ON_ALIAS_CONFLICT)!=0)
+				{
+					throw new IllegalArgumentException("The argument corresponding to the parameter named alias is name conflict!");
+				}
+			}
+		}
+		Properties prop=new Properties();
+		File file=new File(path);
+		if(file.isDirectory()||!path.endsWith(".properties")) return null;
+		try
+		{
+			file.createNewFile();
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+		synchronized (propLock)
+		{
+			aliasMap.put(alias, path);
+			propMap.put(path, prop);
+		}
+		return true;
+	}
+	
+	/**
 	 * 载入指定目录下的properties文件,并指定作用域别名
 	 * @param path properties文件路径
 	 * @param alias 作用域别名
@@ -62,9 +114,17 @@ public final class JohnPropManager
 		{
 			oldPath = aliasMap.get(alias);
 		}
-		if(oldPath!=null&&oldPath.equals(path))
+		if(oldPath!=null)
 		{
-			return false;
+			if(oldPath.equals(path))
+			{
+				return false;
+			}else{
+				if((flags & FLAG_THROW_ON_ALIAS_CONFLICT)!=0)
+				{
+					throw new IllegalArgumentException("The argument corresponding to the parameter named alias is name conflict!");
+				}
+			}
 		}
 		Properties prop=new Properties();
 		try
@@ -86,19 +146,19 @@ public final class JohnPropManager
 	/**
 	 * 重新加载指定作用域别名对应的属性文件,当确定该属性文件得到更新但未接到通知时
 	 * @param alias 作用域别名
-	 * @return 如果重新加载成功将返回true;如果重新加载过程中发生错误,将返回false 
+	 * @return 如果重新加载成功将返回true;如果重新加载过程中发生错误,将返回false,如果没有抛出异常应作为别名不存在处理 
 	 */
 	public boolean reloadProperties(String alias)
 	{
 		String path;
 		Properties prop;
-		synchronized (propLock)
-		{
-			path = aliasMap.get(alias);
-			prop = propMap.get(path);
-		}
 		try
 		{
+			synchronized (propLock)
+			{
+				path = aliasMap.get(alias);
+				prop = propMap.get(path);
+			}
 			prop.load(new FileInputStream(path));
 		} catch (Exception e)
 		{
@@ -122,13 +182,13 @@ public final class JohnPropManager
 	{
 		String path;
 		Properties prop;
-		synchronized (propLock)
-		{
-			path = aliasMap.get(alias);
-			prop = propMap.get(path);
-		}
 		try
 		{
+			synchronized (propLock)
+			{
+				path = aliasMap.get(alias);
+				prop = propMap.get(path);
+			}
 			prop.store(new FileOutputStream(path), null);
 		} catch (Exception e)
 		{
@@ -164,7 +224,7 @@ public final class JohnPropManager
 	
 	/**
 	 * 在全局范围内设置键所对应值,全局范围指进程范围内共享,但是无法序列化或保存值的更改,进程结束所有的键值对失效
-	 * @return 在通知变更过程中发生异常将返回false,否则返回true
+	 * @return 在通知变更过程中发生异常或未启动异常通知功能将返回false,否则返回true
 	 */
 	public boolean setProperty(String key,String value)
 	{
@@ -173,7 +233,9 @@ public final class JohnPropManager
 		{
 			oldValue = GlobalProperties.processSharedGlobalVariable.put(key, value);
 		}
-		return firePropChangeCallback(null, key, oldValue, value);
+		if((flags&FLAG_ENABLE_FIRE_PROP_CHANGE)!=0)
+			return firePropChangeCallback(null, key, oldValue, value);
+		return false;
 	}
 	
 	/**
@@ -200,7 +262,7 @@ public final class JohnPropManager
 	
 	/**
 	 * 在作用域别名内设置键所对应值
-	 *  @return 在通知变更过程中发生异常将返回false,否则返回true
+	 *  @return 在通知变更过程中发生异常或未启动异常通知功能将返回false,否则返回true
 	 */
 	public boolean setProperty(String alias, String key, String value)
 	{
@@ -209,7 +271,15 @@ public final class JohnPropManager
 		{
 			oldValue = (String) propMap.get(aliasMap.get(alias)).setProperty(key, value);
 		}
-		return firePropChangeCallback(alias, key, oldValue, value);
+		if((flags&FLAG_ENABLE_FIRE_PROP_CHANGE)!=0)
+			return firePropChangeCallback(alias, key, oldValue, value);
+		return false;
+	}
+	
+	/** 设置标志,取值有FLAG_THROW_ON_ALIAS_CONFLICT,FLAG_ENABLE_FIRE_PROP_CHANGE,可按位或*/
+	public void setFlags(int flags)
+	{
+		this.flags=flags;
 	}
 	
 	/**测试如果包含此作用域别名返回true*/

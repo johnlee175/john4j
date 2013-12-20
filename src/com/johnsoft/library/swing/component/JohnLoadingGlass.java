@@ -67,15 +67,20 @@ public class JohnLoadingGlass extends JComponent implements WindowListener,Compo
 		this.comp=comp;
 	}
 	
-	protected void createDialog()
+	protected void createDialog(boolean winSize)
 	{
 		Window wnd=SwingUtilities.windowForComponent(comp);
 		dialog=new JDialog(wnd);
 		dialog.setUndecorated(true);
 		AWTUtilities.setWindowOpaque(dialog, false);
 		dialog.setContentPane(this);
-		dialog.setSize(comp.getSize());
-		dialog.setLocationRelativeTo(wnd);
+		dialog.setSize(winSize?wnd.getSize():comp.getSize());
+		if(winSize)
+		{
+			dialog.setLocationRelativeTo(wnd);
+		}else{
+			dialog.setLocation(comp.getLocationOnScreen());
+		}
 	}
 	
 	protected void createTimer()
@@ -165,9 +170,9 @@ public class JohnLoadingGlass extends JComponent implements WindowListener,Compo
 		Rectangle r=comp.getBounds();
 		int w=icon.getIconWidth();
 		int h=icon.getIconHeight();
-		int x=r.width>w?((r.x+r.width-w)/2):r.x;
-		int y=r.height>h?((r.y+r.height-h)/2):r.y;
-		g.setColor(new Color(255,255,255,75));
+		int x=r.width>w?(r.x+(r.width-w)/2):r.x;
+		int y=r.height>h?(r.y+(r.height-h)/2):r.y;
+		g.setColor(new Color(255,255,255,125));
 		g.fillRect(r.x, r.y, r.width, r.height);
 		g.drawImage(icon.getImage(), x, y, w, h, null);
 	}
@@ -193,14 +198,34 @@ public class JohnLoadingGlass extends JComponent implements WindowListener,Compo
 	}
 	
 	/**
-	 * 展示loading
+	 * 展示loading,以绑定的组件尺寸,不适合组件的尺寸频繁自动更改的情况(比如在componentResized里),用户更改不算
 	 */
 	public void show()
 	{
 		isLoading=true;
 		if(dialog==null)
 		{
-			createDialog();
+			createDialog(false);
+		}
+		if(timer==null)
+		{
+			createTimer();
+		}
+		installListeners();
+		dialog.setVisible(true);
+		timer.start();
+		oldMillSecd=System.currentTimeMillis();
+	}
+	
+	/**
+	 * 展示loading,以顶层窗口尺寸,这样避免了在加载时窗口被关闭,已经在组件实时变动时(比如在componentResized里)调用造成的频繁变动
+	 */
+	public void showFill()
+	{
+		isLoading=true;
+		if(dialog==null)
+		{
+			createDialog(true);
 		}
 		if(timer==null)
 		{
