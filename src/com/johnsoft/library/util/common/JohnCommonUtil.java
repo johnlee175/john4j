@@ -293,4 +293,24 @@ public class JohnCommonUtil
 		}
 	}
 	
+	public static double max(double...ds)
+	{
+		double maxv=ds[0];
+		for(int i=1;i<ds.length;i++)
+		{
+			maxv=Math.max(ds[i], maxv);
+		}
+		return maxv;
+	}
+	
+	public static double min(double...ds)
+	{
+		double minv=ds[0];
+		for(int i=1;i<ds.length;i++)
+		{
+			minv=Math.min(ds[i], minv);
+		}
+		return minv;
+	}
+	
 }

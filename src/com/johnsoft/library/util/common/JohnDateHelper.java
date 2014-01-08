@@ -300,4 +300,39 @@ public class JohnDateHelper {
 	public static boolean isFormattedDate(String text, String... datePattern) {
 		return parseDate(text, datePattern, 0);
 	}
+	
+	/** 将end和start按照pattern给定的格式解析成日期时间,然后计算end-start的差额,
+	 * 差额的单位一般返回毫秒数,如果pattern以s结尾获得秒数,以m结尾获得分钟数,以H结尾获得小时数,以d结尾获得天数,
+	 * 注意start,end,pattern参数需要保证不为空且合法,否则将返回null*/
+	public static Long getTimeDifference(String end,String start,String pattern)
+	{
+		try
+		{
+			SimpleDateFormat sdf=new SimpleDateFormat(pattern);
+			long endMillSecond=sdf.parse(end).getTime();
+			long startMillSecond=sdf.parse(start).getTime();
+			long factor=1;
+			if(pattern.endsWith("s"))
+			{
+				factor=1000;
+			}
+			else if(pattern.endsWith("m"))
+			{
+				factor=1000*60;
+			}
+			else if(pattern.endsWith("H"))
+			{
+				factor=1000*60*60;
+			}
+			else if(pattern.endsWith("d"))
+			{
+				factor=1000*60*60*24;
+			}
+			return (endMillSecond-startMillSecond)/factor;
+		} catch (ParseException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
 }
