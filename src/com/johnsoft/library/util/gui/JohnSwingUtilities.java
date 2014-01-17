@@ -1381,10 +1381,16 @@ public class JohnSwingUtilities
 		timer.start();
 	}
 	
-	/**程序级别的全局输入事件即鼠标键盘事件的监听*/
+	/**注册程序级别的全局输入事件即鼠标键盘事件的监听*/
 	public static void addProgramInputEventListener(AWTEventListener listener)
 	{
 		Toolkit.getDefaultToolkit().addAWTEventListener(listener, AWTEvent.MOUSE_EVENT_MASK+AWTEvent.MOUSE_MOTION_EVENT_MASK+AWTEvent.MOUSE_WHEEL_EVENT_MASK+AWTEvent.KEY_EVENT_MASK);
+	}
+	
+	/**移除程序级别的全局输入事件即鼠标键盘事件的监听*/
+	public static void removeProgramInputEventListener(AWTEventListener listener)
+	{
+		Toolkit.getDefaultToolkit().removeAWTEventListener(listener);
 	}
 	
 	/**左键双击*/

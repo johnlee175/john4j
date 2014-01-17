@@ -1,11 +1,5 @@
 package com.johnsoft.tools;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import com.johnsoft.library.util.jdbc.JohnJDBCUtil;
 
 public class OracleConnTest
 {

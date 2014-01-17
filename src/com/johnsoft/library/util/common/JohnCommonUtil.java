@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.io.RandomAccessFile;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -311,6 +312,22 @@ public class JohnCommonUtil
 			minv=Math.min(ds[i], minv);
 		}
 		return minv;
+	}
+	
+	/**
+	 * 检查是否发生了不可捕获的异常,这里的不可捕获异常仅只异常在实现端已经捕获,在客户端调用时无法知道是否发生了异常的情况,注意:实现端在捕获异常的时候必须有printStackTrace等相关动作.
+	 * @param exceptionClassName 异常类的全名,比如:"java.net.SocketException"
+	 * @param runnable 携带已经捕获exceptionClassName异常的方法的代码段,注意,这里的run方法不会被新线程调用,仅仅是作为代码段的载体
+	 */
+	public static boolean happenUncatchableException(String exceptionClassName,Runnable runnable)
+	{
+		ByteArrayOutputStream baos=new ByteArrayOutputStream();
+		PrintStream ps=System.err;
+		System.setErr(new PrintStream(baos));
+		runnable.run();
+		String str=new String(baos.toByteArray());
+		System.setErr(ps);
+		return str.startsWith(exceptionClassName);
 	}
 	
 }

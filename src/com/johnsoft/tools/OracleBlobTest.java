@@ -1,16 +1,5 @@
 package com.johnsoft.tools;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import com.johnsoft.library.util.jdbc.JohnJDBCUtil;
-import com.johnsoft.library.util.jdbc.JohnJDBCUtil.Call;
 
 public class OracleBlobTest
 {

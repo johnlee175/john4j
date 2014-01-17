@@ -1,7 +1,6 @@
 package com.johnsoft.tools;
 
 import java.awt.Font;
-import java.awt.GraphicsEnvironment;
 import java.awt.font.FontRenderContext;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -175,9 +174,9 @@ public class FileCopyer
 		File[] fs=file.listFiles();
 		if(fs!=null)
 		{
-			for(File f:fs)
-			{
-				 String name=f.getName();
+//			for(File f:fs)
+//			{
+//				 String name=f.getName();
 //				 for(int i=0;i<name.length();i++)
 //				 {
 //					 if(((int)name.charAt(i))>127)
@@ -193,7 +192,7 @@ public class FileCopyer
 //					  // System.out.println(name);
 //					   f.delete();
 //				 }
-			}
+//			}
 		}
 	}
 	

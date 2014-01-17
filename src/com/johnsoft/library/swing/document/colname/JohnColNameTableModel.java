@@ -8,7 +8,7 @@ public abstract class JohnColNameTableModel<T> extends AbstractTableModel
 {
 	private static final long serialVersionUID = 1L;
 	
-	protected JohnColNameHelper helper=JohnColNameHelper.getNewInstance(getTableClass());
+	protected JohnColNameHelper helper=JohnColNameHelper.getSharedInstance(getTableClass());
 	
 	protected List<T> list;
 	

@@ -1,11 +1,5 @@
 package com.johnsoft.tools;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.SQLException;
-
-import com.johnsoft.library.util.jdbc.JohnJDBCUtil;
-import com.johnsoft.library.util.jdbc.JohnJDBCUtil.Call;
 
 public class OracleNvarcharTest
 {

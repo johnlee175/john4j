@@ -8,7 +8,8 @@ public class JohnUndo<T> {
     private LinkedList<T> primaryList = new LinkedList<T>();  
       
     //快照列表  
-    private LinkedList<List> snapshotList = new LinkedList<List>();  
+    @SuppressWarnings("rawtypes")
+	private LinkedList<List> snapshotList = new LinkedList<List>();  
       
     //上一次操作调用的方法  
     private Method lastOperation;  
@@ -28,7 +29,8 @@ public class JohnUndo<T> {
     //从最新的快照恢复  
     private void restoreFromSnapshot() {  
         //pollLast()获取并移除此列表的最后一个元素；如果此列表为空，则返回 null。  
-        List<T> snapshot = snapshotList.pollLast();    
+        @SuppressWarnings("unchecked")
+		List<T> snapshot = snapshotList.pollLast();    
         primaryList.clear();  
         for (T element : snapshot) {  
             primaryList.add(element);  

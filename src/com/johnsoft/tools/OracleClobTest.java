@@ -1,16 +1,5 @@
 package com.johnsoft.tools;
 
-import java.io.CharArrayReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import com.johnsoft.library.util.jdbc.JohnJDBCUtil;
-import com.johnsoft.library.util.jdbc.JohnJDBCUtil.Call;
 //建议参考OracleLobTest中的setString用法代替io用法
 public class OracleClobTest
 {
