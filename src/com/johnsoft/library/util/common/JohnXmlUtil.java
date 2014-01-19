@@ -13,37 +13,111 @@ import java.util.List;
 import java.util.Map;
 
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
 /**
- * xml文件的辅助操作类
+ * XML文件的辅助操作类
  * @author 李哲浩
  */
-public class JohnXmlHelper
+public class JohnXmlUtil
 {
-	private XMLWriter writer;
-	private SAXReader reader;
-	private Document doc;
-	private Element root;
-	
 	/**
-	 * 读取xml文件流,如果不返还null,即读取成功,返回值为根元素
+	 * 读取文档
+	 * @param is XML文件输入流
+	 * @param obj 如果不为null,并且该数组的长度不为0,将在第一个元素上填充Document对象,第二个元素上填充root元素
+	 * @param childUnderRoot 如果不为null,将做清空操作,然后填充所有root节点的子节点集合
+	 * @return 成功返回true,失败返回false
 	 */
-	public Element read(InputStream is)
+	@SuppressWarnings("unchecked")
+	public static boolean read(InputStream is, Object[] obj, List<Element> childUnderRoot)
 	{
 		try
 		{
-			if(reader==null)
+			SAXReader reader=new SAXReader();
+			Document doc=reader.read(is);
+			Element root=doc.getRootElement();
+			if(obj!=null)
 			{
-				reader=new SAXReader();
+				if(obj.length==1)
+				{
+					obj[0]=doc;
+				}
+				else if(obj.length>1)
+				{
+					obj[0]=doc;
+					obj[1]=root;
+				}
 			}
-			doc=reader.read(is);
-			return root=doc.getRootElement();
-		} catch (DocumentException e)
+			if(childUnderRoot!=null)
+			{
+				childUnderRoot.clear();
+				childUnderRoot.addAll(root.elements());
+			}
+			return true;
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	/**
+	 * 读取文档
+	 * @param fileName XML文件路径名
+	 * @param obj 如果不为null,并且该数组的长度不为0,将在第一个元素上填充Document对象,第二个元素上填充root元素
+	 * @param childUnderRoot 如果不为null,将做清空操作,然后填充所有root节点的子节点集合
+	 * @return 成功返回true,失败返回false
+	 */
+	@SuppressWarnings("unchecked")
+	public static boolean read(String fileName, Object[] obj, List<Element> childUnderRoot)
+	{
+		try
+		{
+			SAXReader reader=new SAXReader();
+			Document doc=reader.read(new File(fileName));
+			Element root=doc.getRootElement();
+			if(obj!=null)
+			{
+				if(obj.length==1)
+				{
+					obj[0]=doc;
+				}
+				else if(obj.length>1)
+				{
+					obj[0]=doc;
+					obj[1]=root;
+				}
+			}
+			if(childUnderRoot!=null)
+			{
+				childUnderRoot.clear();
+				childUnderRoot.addAll(root.elements());
+			}
+			return true;
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	/**
+	 * 创建打开格式化写入流.使用完后需要调用endWrite方法
+	 * @param os 被包装的待写入的目标文档流
+	 * @param encode 编码方式
+	 * @return 成功返回XMLWriter对象,出错返回null
+	 */
+	public static XMLWriter beginWrite(OutputStream os,String encode)
+	{
+		try
+		{
+			OutputFormat format=OutputFormat.createPrettyPrint();
+			format.setEncoding(encode);
+			return new XMLWriter(os,format);
+		} catch (Exception e)
 		{
 			e.printStackTrace();
 			return null;
@@ -51,90 +125,20 @@ public class JohnXmlHelper
 	}
 	
 	/**
-	 * 读取xml文件
+	 * 写入后关闭流,成功返回true,失败返回false
 	 */
-	public void read(String fileName)
-	{
-		try
-		{
-			if(reader==null)
-			{
-				reader=new SAXReader();
-			}
-			doc=reader.read(new File(fileName));
-			root=doc.getRootElement();
-		} catch (DocumentException e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * 创建打开格式化写入流
-	 * @param os 被包装的待写入的目标文档流
-	 * @param encode 编码方式
-	 */
-	public void beginWrite(OutputStream os,String encode)
-	{
-		try
-		{
-			OutputFormat format=OutputFormat.createPrettyPrint();
-			format.setEncoding(encode);
-			writer=new XMLWriter(os,format);
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * 写入后关闭流
-	 */
-	public void endWrite()
+	public static boolean endWrite(XMLWriter writer,Document doc)
 	{
 		try
 		{
 			writer.write(doc);
 			writer.close();
+			return true;
 		} catch (Exception e)
 		{
 			e.printStackTrace();
+			return false;
 		}
-	}
-	
-	public SAXReader getReader()
-	{
-		return reader;
-	}
-	
-	public XMLWriter getWriter()
-	{
-		return writer;
-	}
-
-	/**
-	 * @return 文档对象
-	 */
-	public Document getDocument()
-	{
-		return doc;
-	}
-
-	/**
-	 * @return 根节点
-	 */
-	public Element getRootElement()
-	{
-		return root;
-	}
-	
-	/**
-	 * 仅仅获取根节点下的所有元素集合
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Element> getElementsUnderRoot()
-	{
-		 return (List<Element>)root.elements();
 	}
 
 	/**
@@ -146,7 +150,7 @@ public class JohnXmlHelper
 	 * @return 查出的属性值
 	 */
 	@SuppressWarnings("unchecked")
-	public String findAttrValueFromHadAttr(Element e,String attrName,String attrValue,String findAttrName)
+	public static String findAttrValueFromHadAttr(Element e,String attrName,String attrValue,String findAttrName)
 	{
 		List<Element> list=e.elements();
 		for(Element el:list)
@@ -164,7 +168,7 @@ public class JohnXmlHelper
 	 * @return parent为父节点的直接子节点的特定属性列表
 	 */
 	@SuppressWarnings("unchecked")
-	public List<String> getChildAttr(Element parent,String attrName)
+	public static List<String> getChildAttr(Element parent,String attrName)
 	{
 		List<String> result=new ArrayList<String>();
 		List<Element> list=parent.elements();
@@ -176,12 +180,10 @@ public class JohnXmlHelper
 	}
 	
 	/**
-	 * @param attrNameKey 要作为键的属性名
-	 * @param attrNameValue 要作为值的属性名
 	 * @return parent为父节点的直接子节点的某两个属性的键值对表
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String,String> getChildAttrsMaps(Element parent,String attrNameKey,String attrNameValue)
+	public static Map<String,String> getChildAttrsMaps(Element parent,String attrNameKey,String attrNameValue)
 	{
 		Map<String,String> map=new HashMap<String,String>();
 		List<Element> list=parent.elements();
@@ -193,10 +195,10 @@ public class JohnXmlHelper
 	}
 	
 	/**
-	 * @return 将parent子节点们作为beanClass所指定的类型的对象以列表形式返回
+	 * @return 将parent子节点们作为beanClass所指定的类型的对象以列表形式返回,出错返回null
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> List<T> getPojoList(Element parent, Class<T> beanClass)
+	public static <T> List<T> getPojoList(Element parent, Class<T> beanClass)
 	{
 		try
 		{
@@ -225,5 +227,4 @@ public class JohnXmlHelper
 			return null;
 		} 
 	}
-	
 }
