@@ -5,7 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * 杂项辅助类
@@ -13,7 +15,8 @@ import java.util.Locale;
  * @author 李哲浩
  */
 public class JohnDateHelper {
-	private static SimpleDateFormat format;
+	
+	private static final Map<String, SimpleDateFormat> map=new HashMap<String, SimpleDateFormat>();
 
 	public static final SimpleDateFormat datetimeFormat = new FixedDateFormat(
 			"yyyyMMddHHmm");
@@ -21,6 +24,22 @@ public class JohnDateHelper {
 			"HH:mm");
 	public static final SimpleDateFormat dateFormat = new FixedDateFormat(
 			"yyyyMMdd");
+	
+	/**
+	 * 返回指定格式的SimpleDateFormat
+	 */
+	public static SimpleDateFormat getDateFormat(String pattern) {
+		synchronized (map)
+		{
+			SimpleDateFormat format=map.get(pattern);
+			if(format==null)
+			{
+				format=new SimpleDateFormat(pattern);
+				map.put(pattern, format);
+			}
+			return format;
+		}
+	}
 
 	public static Long diffmm(String date1, String date2, SimpleDateFormat sdf) {
 		try {
@@ -31,18 +50,6 @@ public class JohnDateHelper {
 			e.printStackTrace();
 			return null;
 		}
-	}
-
-	/**
-	 * 返回指定格式的SimpleDateFormat
-	 */
-	public static SimpleDateFormat getDateFormat(String pattern) {
-		if (format == null) {
-			format = new SimpleDateFormat(pattern);
-		} else if (!format.toPattern().equals(pattern)) {
-			format.applyPattern(pattern);
-		}
-		return format;
 	}
 
 	/**
