@@ -74,10 +74,12 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
+import javax.swing.LookAndFeel;
 import javax.swing.Popup;
 import javax.swing.PopupFactory;
 import javax.swing.Timer;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -96,6 +98,7 @@ import aurelienribon.tweenengine.Tween;
 import aurelienribon.tweenengine.TweenCallback;
 import aurelienribon.tweenengine.TweenEquation;
 
+import com.jidesoft.swing.JideButton;
 import com.johnsoft.library.swing.component.JohnActiveHeaderRenderer;
 import com.johnsoft.library.swing.effect.tween.ComponentTweenAccessor;
 import com.johnsoft.library.swing.effect.tween.ComponentTweenHelper;
@@ -107,6 +110,12 @@ public class JohnSwingUtilities
 {
 	/**默认的资源路径*/
 	public static String IMAGE_RESOURCE_BASE="images/";
+	
+	/** 尺寸为0的Dimension唯一对象*/
+	public static final Dimension EMPTY_DIMEN=new Dimension();
+	/** 透明色的Color唯一对象*/
+	public static final Color TRANSPARENT_COLOR=new Color(0, 0, 0, 0);
+	
 	/**
 	 * 稍稍封装了获得image的过程,默认搜索
 	 */
@@ -1748,5 +1757,19 @@ public class JohnSwingUtilities
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public static JideButton newJideButton()
+	{
+		LookAndFeel laf = UIManager.getLookAndFeel();
+		JideButton btn = new JideButton();
+		try
+		{
+			UIManager.setLookAndFeel(laf);
+		} catch (UnsupportedLookAndFeelException e)
+		{
+			e.printStackTrace();
+		}
+		return btn;
 	}
 }

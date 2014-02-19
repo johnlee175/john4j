@@ -16,6 +16,7 @@ import javax.swing.Icon;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JViewport;
+import javax.swing.LookAndFeel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
@@ -224,41 +225,46 @@ public class JohnActiveHeaderRenderer implements TableCellRenderer, MouseMotionL
 	public Component getTableCellRendererComponent(JTable table,
 			Object value, boolean isSelected, boolean hasFocus, int row, int column)
 	{
-		JideButton btn=new JideButton();
-		if(colHeader!=null)
-		{
-			btn.setPreferredSize(new Dimension(0, colHeaderHeight));
-		}
-		btn.putClientProperty("JideButton.alwaysPaintBackground", true);
+		LookAndFeel laf = UIManager.getLookAndFeel(); //because of JideButton will change the default LookAndFeel
+		JideButton btn = new JideButton();
 		btn.setButtonStyle(JideButton.TOOLBOX_STYLE);
 		btn.setBackgroundOfState(ThemePainter.STATE_DEFAULT,Color.WHITE);
 //		btn.setBackgroundOfState(ThemePainter.STATE_SELECTED,new Color(0xA9DEF0));
 //		btn.setBackgroundOfState(ThemePainter.STATE_PRESSED, new Color(0xA9DEF0));
 //		btn.setBackgroundOfState(ThemePainter.STATE_ROLLOVER, new Color(0xDFF0FF));
+		try
+		{
+			UIManager.setLookAndFeel(laf); //because of JideButton will change the default LookAndFeel
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		btn.setBorderPainted(false);
+		btn.putClientProperty("JideButton.alwaysPaintBackground", true);
+		btn.setBorder(BorderFactory.createEmptyBorder());
 		if(colHeader!=null)
 		{
 			btn.setFont(colHeader.getFont());
+			btn.setPreferredSize(new Dimension(0, colHeaderHeight));
 		}else{
 			btn.setFont(rowHeader.getFont());
 		}
 		btn.setText(value==null?"":value.toString());
-		btn.setBorderPainted(false);
-		btn.setBorder(BorderFactory.createEmptyBorder());
 		ButtonModel bm=btn.getModel();
 		if(rolloverIdx!=-1&&((rowHeader==null&&rolloverIdx==column)||colHeader==null&&rolloverIdx==row))
 		{
 			bm.setRollover(true);
-//			btn.setBorder(BorderFactory.createLineBorder(new Color(0x00B2EE)));
+//				btn.setBorder(BorderFactory.createLineBorder(new Color(0x00B2EE)));
 		}
 		if(pressIdx!=-1&&((rowHeader==null&&pressIdx==column)||colHeader==null&&pressIdx==row))
 		{
 			bm.setPressed(true);
-//			btn.setBorder(BorderFactory.createLineBorder(new Color(0x008B8B)));
+//				btn.setBorder(BorderFactory.createLineBorder(new Color(0x008B8B)));
 		}
 		if(isSelected)
 		{
 			bm.setSelected(true);
-//			btn.setBorder(BorderFactory.createLineBorder(new Color(0x00FA9A)));
+//				btn.setBorder(BorderFactory.createLineBorder(new Color(0x00FA9A)));
 		}
 		Icon icon=null;
 		SortOrder so=DefaultTableCellHeaderRenderer.getColumnSortOrder(table, column);
