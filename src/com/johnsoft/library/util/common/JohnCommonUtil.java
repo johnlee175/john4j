@@ -20,7 +20,6 @@ import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.security.MessageDigest;
-import java.util.Collection;
 import java.util.Date;
 /**
  * 可复用的通用Object的通用操作工具类
@@ -76,33 +75,6 @@ public class JohnCommonUtil
 		RuntimeMXBean driver=ManagementFactory.getRuntimeMXBean();
 		String name=driver.getName();
 	    return Integer.parseInt(name.split("@")[0]);  
-	}
-	
-	/**objs中有一个为null,即为false*/
-	public static boolean isNoOneNull(Object...objs)
-	{
-		for(Object obj:objs)
-		{
-			if(obj==null) return false;
-		}
-		return true;
-	}
-	
-	/**将集合元素按某个字串拼接*/
-	public static String join(Collection<String> c,String joinSymbol)
-	{
-		StringBuffer sb=new StringBuffer("");
-		for(String text:c)
-		{
-			sb.append(text).append(joinSymbol);
-		}
-		int sblen=sb.length();
-		int symlen=joinSymbol.length();
-		if(sblen>symlen)
-		{
-			sb.delete(sblen-symlen, sblen);
-		}
-		return sb.toString();
 	}
 	
 	/**获取分级别的北京时间,由于查询服务器,可能在网络传输中丢失秒级别的精度*/
