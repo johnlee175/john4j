@@ -110,7 +110,7 @@ public class JohnSecurityUtil
 		String stmp = "";
 		for (int i = 0; i < bytes.length; i++)
 		{
-			stmp = Integer.toHexString(bytes[i] & 0XFF);
+			stmp = Integer.toHexString(bytes[i] & 0X000000FF);
 			if (stmp.length() == 1)
 				hs = hs + "0" + stmp;
 			else
