@@ -199,6 +199,18 @@ public class JohnSecurityUtil
 			return null;
 		}
 	}
+	
+	/*
+	 * 到oracle官网java se download页面下载Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files for JDK/JRE 8 or 7
+	 * 或者下载http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html,
+	 * 下载下来的jce_policy-6.zip, 里提取local_policy.jar和US_export_policy.jar,
+     * 到${JAVA_HOME}/jdk${version}/jre/lib/security覆盖同名文件,然后到${JAVA_HOME}/jre${version}/lib/security覆盖同名文件,
+	 * 这样jdk即可支持256位的AES;
+	 * JCE中AES支持五中模式: ECB, CBC, CFB, OFB, PCBC(不支持NONE, CTR); 支持三种填充: NoPadding, PKCS5Padding, ISO10126Padding(不支持PKCS7Padding, SSL3Padding);
+	 * 既可以Cipher.getInstance("AES"); //算法
+	 * 也可以Cipher.getInstance("AES/CBC/PKCS5Padding"); //算法/模式/填充
+	 * 如果需要PKCS7Padding以兼容C#, Objective-C, 可以考虑Bouncy Castle, 这是链接http://www.bouncycastle.org/latest_releases.html
+	 */
 
 	/**
 	 * @param content 要加密的字符串
@@ -210,7 +222,7 @@ public class JohnSecurityUtil
 		try
 		{
 			KeyGenerator kgen = KeyGenerator.getInstance("AES");
-			kgen.init(128, new SecureRandom(password.getBytes()));
+			kgen.init(128/* 256 */, new SecureRandom(password.getBytes()));
 			SecretKey secretKey = kgen.generateKey();
 			byte[] enCodeFormat = secretKey.getEncoded();
 			SecretKeySpec key = new SecretKeySpec(enCodeFormat, "AES");
@@ -237,7 +249,7 @@ public class JohnSecurityUtil
 		try
 		{
 			KeyGenerator kgen = KeyGenerator.getInstance("AES");
-			kgen.init(128, new SecureRandom(password.getBytes()));
+			kgen.init(128/* 256 */, new SecureRandom(password.getBytes()));
 			SecretKey secretKey = kgen.generateKey();
 			byte[] enCodeFormat = secretKey.getEncoded();
 			SecretKeySpec key = new SecretKeySpec(enCodeFormat, "AES");
